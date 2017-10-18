@@ -100,7 +100,7 @@
       }
 
       _refreshLabel() {
-        this.fileLabel = (this.file ? this.file.name : this.label) + " or ";
+        this.fileLabel = (this.file ? this.file.name : (this.label || "Drag and drop a file")) + " or ";
       }
 
       _fileChanged() {
