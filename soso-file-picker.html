@@ -68,7 +68,7 @@
     </style>
     <div class="flex"></div>
     <div id="nofile">
-      <span class="inline">[[fileLabel]]</span> or
+      <span class="inline">[[fileLabel]]</span>
       <div class="fiContainer inline">
         <label class="link">[[browseLabel]]</label>
         <input id="fi" type="file" accept$="[[accept]]" title="Browse files" on-change="_fileChanged">
@@ -98,7 +98,7 @@
       }
 
       _refreshLabel() {
-        this.fileLabel = this.file ? this.file.name : this.label;
+        this.fileLabel = (this.file ? this.file.name : this.label) + " or ";
       }
 
       _fileChanged() {
