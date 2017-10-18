@@ -1,2 +1,4 @@
-# soso-file-picker
-Simple file picker with drag'n'drop support
+# \<soso-file-picker\>
+
+A simple file picker with drag&#39;n&#39;drop support
+

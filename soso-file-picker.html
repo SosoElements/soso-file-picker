@@ -1,0 +1,189 @@
+<link rel="import" href="../polymer/polymer-element.html">
+
+<dom-module id="soso-file-picker">
+  <template>
+    <style>
+      :host {
+        display: block;
+        width: 100%;
+        min-height: 40px;
+        box-sizing: border-box;
+        padding: 5px;
+        border: 2px dashed rgba(0, 0, 0, 0.4);
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -ms-flex-direction: column;
+        -webkit-flex-direction: column;
+        flex-direction: column;
+        color: #777;
+        letter-spacing: 0.03em;
+      }
+
+      :host(.dragging) {
+        border-color: var(--soso-border-color, #4CAF50);
+        background-color: var(--soso-bg-color, #E8F5E9);
+      }
+
+      .inline {
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      .flex {
+        -ms-flex: 1 1 0.000000001px;
+        -webkit-flex: 1;
+        flex: 1;
+        -webkit-flex-basis: 0.000000001px;
+        flex-basis: 0.000000001px;
+      }
+
+      #nofile {
+        text-align: center;
+      }
+
+      .fiContainer {
+        display: inline-block;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        color: var(--soso-link-color, #4CAF50);
+        border-bottom: 1px solid;
+      }
+
+      #fi {
+        position: absolute;
+        opacity: 0;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+    <div class="flex"></div>
+    <div id="nofile">
+      <span class="inline">[[fileLabel]]</span> or
+      <div class="fiContainer inline">
+        <label class="link">[[browseLabel]]</label>
+        <input id="fi" type="file" accept$="[[accept]]" title="Browse files" on-change="_fileChanged">
+      </div>
+    </div>
+    <div id=""></div>
+    <div class="flex"></div>
+  </template>
+  <script>
+    class SosoFilePicker extends Polymer.Element {
+      static get is() { return 'soso-file-picker'; }
+      static get properties() {
+        return {
+          label: {
+            type: String,
+            value: "Drag and drop a file",
+            observer: '_refreshLabel'
+          },
+          browseLabel: {
+            type: String,
+            value: "browse"
+          },
+          accept: String,
+          fileLabel: String,
+          file: Object
+        };
+      }
+
+      _refreshLabel() {
+        this.fileLabel = this.file ? this.file.name : this.label;
+      }
+
+      _fileChanged() {
+        this.file = (this.$.fi.files || [])[0];
+        this._refreshLabel();
+        this.dispatchEvent(new CustomEvent('files', { bubbles: true, composed: true, detail: { file: this.file } }));
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._attachDragListeners();
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this._detachDragListeners();
+      }
+
+      _attachDragListeners() {
+        this._detachDragListeners();
+        this._dragOverListener = this._onDragOver.bind(this);
+        this._dragLeaveListener = this._onDragLeave.bind(this);
+        this._dragEndListener = this._onDragEnd.bind(this);
+        this._dropListener = this._onDrop.bind(this);
+        this.addEventListener('dragover', this._dragOverListener);
+        this.addEventListener('dragleave', this._dragLeaveListener);
+        this.addEventListener('dragend', this._dragEndListener);
+        this.addEventListener('drop', this._dropListener);
+      }
+
+      _detachDragListeners() {
+        if (this._dragOverListener) {
+          this.removeEventListener('dragover', this._dragOverListener);
+        }
+        if (this._dragLeaveListener) {
+          this.removeEventListener('dragleave', this._dragLeaveListener);
+        }
+        if (this._dragEndListener) {
+          this.removeEventListener('dragend', this._dragEndListener);
+        }
+        if (this._dropListener) {
+          this.removeEventListener('drop', this._dropListener);
+        }
+        this._dragOverListener = null;
+        this._dragLeaveListener = null;
+        this._dragEndListener = null;
+        this._dropListener = null;
+      }
+
+      _onDragOver(event) {
+        event.preventDefault();
+        this.classList.add("dragging");
+      }
+
+      _onDragLeave(event) {
+        event.preventDefault();
+        this.classList.remove("dragging");
+      }
+
+      _onDragEnd(event) {
+        this.classList.remove("dragging");
+        let dataTransfer = event.dataTransfer;
+        if (dataTransfer) {
+          if (dataTransfer.items) {
+            for (let i = 0; i < dataTransfer.items.length; i++) {
+              dataTransfer.items.remove(i);
+            }
+          } else {
+            event.dataTransfer.clearData();
+          }
+        }
+      }
+
+      _onDrop() {
+        event.preventDefault();
+        this.classList.remove("dragging");
+        let files = [];
+        let dataTransfer = event.dataTransfer;
+        if (dataTransfer && dataTransfer.files && dataTransfer.files.length) {
+          this.file = dataTransfer.files[0];
+          this._refreshLabel();
+          this.dispatchEvent(new CustomEvent('files', { bubbles: true, composed: true, detail: { file: this.file } }));
+        }
+      }
+    }
+    window.customElements.define(SosoFilePicker.is, SosoFilePicker);
+  </script>
+</dom-module>
