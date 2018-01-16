@@ -70,7 +70,7 @@
     </style>
     <div class="flex"></div>
     <div id="nofile">
-      <span class="inline">[[fileLabel]]</span>
+      <span id="prefixLabel" class="inline">[[fileLabel]]</span>
       <div class="fiContainer inline">
         <label class="link">[[browseLabel]]</label>
         <input id="fi" type="file" accept$="[[accept]]" title="Browse files" on-change="_fileChanged">
@@ -87,6 +87,10 @@
           label: {
             type: String,
             value: "Drag and drop a file",
+            observer: '_refreshLabel'
+          },
+          hidePrefixLabel: {
+            type: Boolean,
             observer: '_refreshLabel'
           },
           browseLabel: {
@@ -107,6 +111,9 @@
 
       _refreshLabel() {
         this.fileLabel = (this.file ? this.file.name : (this.label || "Drag and drop a file")) + " or ";
+        if (this.$ && this.$.prefixLabel) {
+          this.$.prefixLabel.style.display = this.hidePrefixLabel ? "none" : "";
+        }
       }
 
       _fileChanged() {
